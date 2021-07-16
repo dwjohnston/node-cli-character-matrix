@@ -9,7 +9,6 @@ startMatrixApplication(5, 5, 100, (matrix, tickCount, exit) => {
 	const setMatrix = setCell(clearedMatrix, tickCount % 5, tickCount % 5, 'X'); 
 
 	if (tickCount > 20) {
-		console.log(tickCount);
 		exit("Thank you for playing!");
 	}
 	return setMatrix; 
