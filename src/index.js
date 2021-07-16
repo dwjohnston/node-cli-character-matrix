@@ -59,6 +59,10 @@ function createMatrix(rows, columns) {
 	return new Array(rows).fill(new Array(columns).fill(' '));
 }
 
+function clearMatrix(matrix) {
+	return createMatrix(matrix.length, matrix[0].length);
+}
+
 function setCell(matrix, rowNum, cellNum, char) {
 	if(typeof char !== 'string') {
 		throw new Error("Char must be a string!"); 
@@ -78,22 +82,18 @@ function setCell(matrix, rowNum, cellNum, char) {
 const N_ROWS = 10; 
 const N_COLS = 10; 
 
-const App = () => {
+const App = ({onTick, intervalTime, initialMatrix}) => {
 
+	const [matrix, setMatrix] = useState(initialMatrix);
 
-	const [y, setY] = useState(0);
-	const [x, setX] = useState(0); 
-	const [matrix, setMatrix ] = useState(createMatrix(N_ROWS, N_COLS)); 
+	const [tickCount, setTickCount] = useState(0);
 
 	useEffect(() => {
 		const timer = setInterval(() => {
-			setX((x +1) % N_COLS); 
-			if (x ===0 ) {
-				setY(y + 1); 
-			}
-			const newMatrix = setCell(matrix, y, x, 'A'); 
+			const newMatrix = onTick(matrix, tickCount); 
+			setTickCount(tickCount +1);
 			setMatrix(newMatrix);
-		}, 100);
+		}, intervalTime);
 
 		return () => {
 			clearInterval(timer);
@@ -103,5 +103,17 @@ const App = () => {
 	return <Main matrix = {matrix}/>;  
 }
 
+function startMatrixApplication(nRows, nColumns, intervalTime, onTick) {
 
-render(<App/>)
+
+	const matrix = createMatrix(nRows, nColumns); 
+	render(<App initialMatrix = {matrix} onTick = {onTick} intervalTime = {intervalTime}/>); 
+
+}
+
+
+startMatrixApplication(5, 5, 100, (matrix, tickCount) => {
+	const clearedMatrix =  clearMatrix(matrix); 
+	const setMatrix = setCell(clearedMatrix, tickCount % 5, tickCount % 5, 'X'); 
+	return setMatrix; 
+}); 
