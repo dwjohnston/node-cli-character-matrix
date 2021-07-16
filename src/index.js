@@ -1,5 +1,8 @@
 const React = require('react');
 const {render, Text, Box} = require('ink');
+const useInterval = require("@use-it/interval").default;
+
+console.log(useInterval);
 
 const {useState, useEffect} = React; 
 
@@ -88,22 +91,23 @@ const App = ({onTick, intervalTime, initialMatrix}) => {
 
 	const [tickCount, setTickCount] = useState(0);
 
-	useEffect(() => {
-		const timer = setInterval(() => {
-			const newMatrix = onTick(matrix, tickCount); 
-			setTickCount(tickCount +1);
-			setMatrix(newMatrix);
-		}, intervalTime);
-
-		return () => {
-			clearInterval(timer);
-		};
+	const exitRef = React.useRef((message) => {
+		console.log(message || "");
+		process.exit(0);
 	}); 
 
+
+	useInterval(() => {
+		console.log(tickCount);
+		const newMatrix = onTick(matrix, tickCount, exitRef.current); 
+		setTickCount(tickCount +1);
+		setMatrix(newMatrix);
+	}, intervalTime);
+	
 	return <Main matrix = {matrix}/>;  
 }
 
-function startMatrixApplication(nRows, nColumns, intervalTime, onTick) {
+function startMatrixApplication(nRows, nColumns, intervalTime, onTick, onExit) {
 
 
 	const matrix = createMatrix(nRows, nColumns); 
@@ -112,8 +116,13 @@ function startMatrixApplication(nRows, nColumns, intervalTime, onTick) {
 }
 
 
-startMatrixApplication(5, 5, 100, (matrix, tickCount) => {
+startMatrixApplication(5, 5, 100, (matrix, tickCount, exit) => {
 	const clearedMatrix =  clearMatrix(matrix); 
 	const setMatrix = setCell(clearedMatrix, tickCount % 5, tickCount % 5, 'X'); 
+
+	if (tickCount > 20) {
+		console.log(tickCount);
+		exit("Thank you for playing!");
+	}
 	return setMatrix; 
 }); 
