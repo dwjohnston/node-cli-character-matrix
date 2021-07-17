@@ -1,10 +1,14 @@
-const React = require('react');
-const {render, Text, Box} = require('ink');
-const useInterval = require("@use-it/interval").default;
+import React, {useState} from 'react';
+import {render, Text, Box} from  'ink';
+import useInterval from "@use-it/interval";
 
-const {useState, useEffect} = React; 
+type Char = string; 
+type Matrix = Array<Array<Char>>;
 
-const Cell = ({char = ' '}) => {
+type TickFunction = (matrix: Matrix, tickCount: number, exit: (message: string) => void) => Matrix;
+
+
+const Cell = ({char = ' '} : {char : Char}) => {
 
 	if (typeof char !== 'string') {
 		throw new Error("Wrong character type! Character must be a string!")
@@ -20,7 +24,7 @@ const Cell = ({char = ' '}) => {
 
 const Main = ({
 	matrix = [[]]
-}) => {
+} : {matrix: Matrix}) => {
 
 	const nRows = matrix.length; 
 	const nCols = matrix[0].length; 
@@ -38,15 +42,15 @@ const Main = ({
 };
 
 
-function createMatrix(rows, columns) {
+export function createMatrix(rows : number, columns : number) : Matrix {
 	return new Array(rows).fill(new Array(columns).fill(' '));
 }
 
-function clearMatrix(matrix) {
+export function clearMatrix(matrix : Matrix) : Matrix {
 	return createMatrix(matrix.length, matrix[0].length);
 }
 
-function setCell(matrix, rowNum, cellNum, char) {
+export function setCell(matrix : Matrix, rowNum : number, cellNum : number, char : Char) {
 	if(typeof char !== 'string') {
 		throw new Error("Char must be a string!"); 
 	}
@@ -61,14 +65,17 @@ function setCell(matrix, rowNum, cellNum, char) {
 	return newMatrix;
 }
 
-const App = ({onTick, intervalTime, initialMatrix}) => {
+const App = ({onTick, intervalTime, initialMatrix} : {
+	onTick: TickFunction; 
+	intervalTime: number; 
+	initialMatrix: Matrix; 
+}) => {
 
 	const [matrix, setMatrix] = useState(initialMatrix);
-
 	const [tickCount, setTickCount] = useState(0);
 
-	const exitRef = React.useRef((message) => {
-		console.log(message || "");
+	const exitRef = React.useRef((message: string = "") => {
+		console.log(message);
 		process.exit(0);
 	}); 
 
@@ -83,19 +90,9 @@ const App = ({onTick, intervalTime, initialMatrix}) => {
 	return <Main matrix = {matrix}/>;  
 }
 
-function startMatrixApplication(nRows, nColumns, intervalTime, onTick, onExit) {
+export function startMatrixApplication(nRows : number, nColumns: number, intervalTime: number, onTick: TickFunction) {
 	const matrix = createMatrix(nRows, nColumns); 
 	render(<App initialMatrix = {matrix} onTick = {onTick} intervalTime = {intervalTime}/>); 
 }
 
 
-startMatrixApplication(30, 30, 100, (matrix, tickCount, exit) => {
-	const clearedMatrix =  clearMatrix(matrix); 
-	const setMatrix = setCell(clearedMatrix, tickCount % 30, tickCount %30, 'X'); 
-
-	if (tickCount > 20) {
-		console.log(tickCount);
-		exit("Thank you for playing!");
-	}
-	return setMatrix; 
-}); 
