@@ -75,13 +75,11 @@ const App = ({onTick, intervalTime, initialMatrix} : {
 	const [tickCount, setTickCount] = useState(0);
 
 	const exitRef = React.useRef((message: string = "") => {
-		console.log(message);
 		process.exit(0);
 	}); 
 
 
 	useInterval(() => {
-		console.log(tickCount);
 		const newMatrix = onTick(matrix, tickCount, exitRef.current); 
 		setTickCount(tickCount +1);
 		setMatrix(newMatrix);
