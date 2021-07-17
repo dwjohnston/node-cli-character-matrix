@@ -1,5 +1,5 @@
 {
-  "name": "cli-test",
+  "name": "node-cli-character-matrix",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
