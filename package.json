@@ -1,7 +1,7 @@
 {
   "name": "node-cli-character-matrix",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "lib/index.js",
   "license": "MIT",
   "dependencies": {
     "@use-it/interval": "^1.0.0",
