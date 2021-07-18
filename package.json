@@ -13,6 +13,7 @@
     "clean": "rm -rf lib",
     "build": "yarn clean && tsc",
     "start": "ts-node ./src/sampleApplication.ts",
+    "start:2": "ts-node ./src/sampleApplication2.ts",
     "start:dev": "nodemon"
   },
   "devDependencies": {
