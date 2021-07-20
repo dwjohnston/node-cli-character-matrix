@@ -1,48 +1,58 @@
-import {startMatrixApplication, clearMatrix, setCell} from ".";
+import { startMatrixApplication, clearMatrix, setCell } from ".";
 
-const N_ROWS = 5; 
-const N_COLUMNS=5;
-const INTERVAL_MS=100; 
+const N_ROWS = 5;
+const N_COLUMNS = 5;
+const INTERVAL_MS = 100;
 
 
-let currentX = 0; 
-let currentY = 0; 
+let currentX = 0;
+let currentY = 0;
 
-startMatrixApplication(N_ROWS, N_COLUMNS, INTERVAL_MS, (matrix, tickCount, exit, keyPress) => {
-	const clearedMatrix =  clearMatrix(matrix); 
+// Conventional / mutative state management
 
-	if (keyPress) {
+startMatrixApplication({
+	nRows: N_ROWS,
+	nColumns: N_COLUMNS,
+	intervalTime: INTERVAL_MS,
+	initialState: null,
+	onTick: (matrix, tickCount, exit, keyPress) => {
+		const clearedMatrix = clearMatrix(matrix);
 
-		switch (keyPress.name) {
-			case "down": {
-				currentY = (currentY + 1 + N_ROWS) % N_ROWS; 
-				break;
-			}
-			case "up" : {
-				currentY = (currentY - 1 + N_ROWS) % N_ROWS; 
-				break;
-			}
+		if (keyPress) {
 
-			case "left" : {
-				currentX = (currentX - 1 + N_COLUMNS) %N_COLUMNS; 
-				break;
-			}
+			switch (keyPress.name) {
+				case "down": {
+					currentY = (currentY + 1 + N_ROWS) % N_ROWS;
+					break;
+				}
+				case "up": {
+					currentY = (currentY - 1 + N_ROWS) % N_ROWS;
+					break;
+				}
 
-			case  "right" : {
-				currentX = (currentX + 1 + N_COLUMNS) %N_COLUMNS; 
-				break;
-			}
+				case "left": {
+					currentX = (currentX - 1 + N_COLUMNS) % N_COLUMNS;
+					break;
+				}
 
-			default: {
+				case "right": {
+					currentX = (currentX + 1 + N_COLUMNS) % N_COLUMNS;
+					break;
+				}
 
+				default: {
+
+				}
 			}
 		}
-	}
 
-	const newMatrix = setCell(clearedMatrix, currentY, currentX, 'X');
+		const newMatrix = setCell(clearedMatrix, currentY, currentX, 'X');
 
-	if (tickCount > 100) {
-		exit("Thank you for playing!");
+		if (tickCount > 100) {
+			exit("Thank you for playing!");
+		}
+		return {newMatrix, newState: null,};
 	}
-	return newMatrix; 
-}); 
+});
+
+

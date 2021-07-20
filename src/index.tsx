@@ -8,21 +8,32 @@ import keypress from "keypress";
 type Char = string;
 type Matrix = Array<Array<Char>>;
 
-type TickFunction = (
+type TickFunction<T> = (
 	matrix: Matrix,
 	tickCount: number,
 	exit: (message: string) => void,
-	lastKeyPress: KeyPress | null
-) => Matrix;
-
-type KeyPress = {
-	name: string; 
-	ctrl: boolean; 
-	meta: boolean; 
-	shift: boolean; 
-	sequence: string; 
+	lastKeyPress: KeyPress | null,
+	oldState: T,
+) => {
+	newMatrix: Matrix;
+	newState: T;
 }
 
+export type KeyPress = {
+	name: string;
+	ctrl: boolean;
+	meta: boolean;
+	shift: boolean;
+	sequence: string;
+}
+
+type Options<T> = {
+	nRows: number;
+	nColumns: number;
+	intervalTime: number;
+	onTick: TickFunction<T>;
+	initialState: T;
+}
 
 const Cell = ({ char = ' ' }: { char: Char }) => {
 
@@ -81,14 +92,16 @@ export function setCell(matrix: Matrix, rowNum: number, cellNum: number, char: C
 	return newMatrix;
 }
 
-const App = ({ onTick, intervalTime, initialMatrix }: {
-	onTick: TickFunction;
+const App = <T,>({ onTick, intervalTime, initialMatrix, initialState }: {
+	onTick: TickFunction<T>;
 	intervalTime: number;
 	initialMatrix: Matrix;
+	initialState: T;
 }) => {
 
 	const [matrix, setMatrix] = useState(initialMatrix);
-	const [tickCount, setTickCount] = useState(0); 
+	const [state, setState] = useState(initialState);
+	const [tickCount, setTickCount] = useState(0);
 	const [lastKeyPress, setLastKeyPress] = useState<null | KeyPress>(null);
 
 	const exitRef = React.useRef((message: string = "") => {
@@ -105,28 +118,41 @@ const App = ({ onTick, intervalTime, initialMatrix }: {
 				process.exit(0);
 			}
 		});
-	
+
 		process.stdin.setRawMode(true);
 		process.stdin.resume();
-	}, []); 
+	}, []);
 
 
 	useInterval(() => {
-		const newMatrix = onTick(matrix, tickCount, exitRef.current, lastKeyPress);
+		const { newMatrix, newState } = onTick(matrix, tickCount, exitRef.current, lastKeyPress, state);
 		setLastKeyPress(null);
 		setTickCount(tickCount + 1);
 		setMatrix(newMatrix);
+		setState(newState);
 	}, intervalTime);
 
 	return <Main matrix={matrix} />;
 }
 
-export function startMatrixApplication(nRows: number, nColumns: number, intervalTime: number, onTick: TickFunction) {
+export function startMatrixApplication<T>(options: Options<T>) {
 
 
+	const {
+		nRows,
+		nColumns,
+		onTick,
+		intervalTime,
+		initialState,
+	} = options;
 
 	const matrix = createMatrix(nRows, nColumns);
-	render(<App initialMatrix={matrix} onTick={onTick} intervalTime={intervalTime} />);
+	render(<App
+		initialMatrix={matrix}
+		onTick={onTick}
+		intervalTime={intervalTime}
+		initialState={initialState}
+	/>);
 }
 
 

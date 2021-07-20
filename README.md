@@ -3,18 +3,20 @@ A simple cli tool for drawing matrix based games.
 
 ## Functions 
 
-### startMatrixApplication(nRows, nColumns, interval, onTick)
+### startMatrixApplication(options)
+
 
 - **nRows** - Number of rows the matrix is to have
 - **nColumns** - Number of columns the matrix is to have. 
 - **interval** - Time in ms between ticks 
-- **onTick** a function of the signature: `(matrix: Matrix, tickCount: number, exit: (message:string) => void) => Matrix`
+- **onTick** a function of the signature: `<T,>(matrix: Matrix, tickCount: number, exit: (message:string) => void, keyPress: KeyPress, oldState:T) => {newMatrix: Matrix, newState: T}`
+- **initialState** The value that the state is initially set as. 
 
 That is: 
 
-Each tick the onTick function will be called with matrix as it currently is, the tick count number, and a function to be called to stop the application running. That function can take an exit message. 
+Each tick the onTick function will be called with matrix as it currently is, the state as it currently is, the tick count number, the most recent key press (if any) and a function to be called to stop the application running. That function can take an exit message. 
 
-The value returned from this onTick function is what will be displayed on the matrix next. 
+The value returned from this onTick function is what will be displayed on the matrix next, as well as any new state to be passed back. This allows for a functional style of programming.
 
 ### createMatrix(rows, columns) 
 
@@ -43,22 +45,31 @@ The following application will draw an X starting at the top left corner, moving
 
 It stops after 20 ticks. 
 
+State is not used in this example. 
+
 ```javascript
-import {startMatrixApplication, clearMatrix, setCell} from "node-cli-character-matrix";
+import { startMatrixApplication, clearMatrix, setCell } from ".";
 
-const N_ROWS = 30; 
-const N_COLUMNS=30;
-const INTERVAL_MS=100; 
+const N_ROWS = 5;
+const N_COLUMNS = 5;
+const INTERVAL_MS = 100;
 
-startMatrixApplication(N_ROWS, N_COLUMNS, INTERVAL_MS, (matrix, tickCount, exit) => {
-	const clearedMatrix =  clearMatrix(matrix); 
-	const newMatrix = setCell(clearedMatrix, tickCount % N_ROWS, tickCount %N_COLUMNS, 'X'); 
+startMatrixApplication({
+	nRows: N_ROWS,
+	nColumns: N_COLUMNS,
+	intervalTime: INTERVAL_MS,
+	onTick: (matrix, tickCount, exit) => {
+		const clearedMatrix = clearMatrix(matrix);
+		const newMatrix = setCell(clearedMatrix, tickCount % N_ROWS, tickCount % N_COLUMNS, 'X');
 
-	if (tickCount > 20) {
-		exit("Thank you for playing!");
-	}
-	return newMatrix; 
-}); 
+		if (tickCount > 20) {
+			exit("Thank you for playing!");
+		}
+		return {newMatrix, newState: null};
+	},
+	initialState: null,
+});
+
 ```
 
 
@@ -66,54 +77,56 @@ startMatrixApplication(N_ROWS, N_COLUMNS, INTERVAL_MS, (matrix, tickCount, exit)
 
 This application will move the X around with the keyboard arrow keys. 
 
+State is not used in this example. 
+
 ```javascript
 
-import {startMatrixApplication, clearMatrix, setCell} from ".";
+let currentX = 0;
+let currentY = 0;
 
-const N_ROWS = 5; 
-const N_COLUMNS=5;
-const INTERVAL_MS=100; 
+startMatrixApplication({
+	nRows: N_ROWS,
+	nColumns: N_COLUMNS,
+	intervalTime: INTERVAL_MS,
+	initialState: null,
+	onTick: (matrix, tickCount, exit, keyPress) => {
+		const clearedMatrix = clearMatrix(matrix);
 
+		if (keyPress) {
 
-let currentX = 0; 
-let currentY = 0; 
+			switch (keyPress.name) {
+				case "down": {
+					currentY = (currentY + 1 + N_ROWS) % N_ROWS;
+					break;
+				}
+				case "up": {
+					currentY = (currentY - 1 + N_ROWS) % N_ROWS;
+					break;
+				}
 
-startMatrixApplication(N_ROWS, N_COLUMNS, INTERVAL_MS, (matrix, tickCount, exit, keyPress) => {
-	const clearedMatrix =  clearMatrix(matrix); 
+				case "left": {
+					currentX = (currentX - 1 + N_COLUMNS) % N_COLUMNS;
+					break;
+				}
 
-	if (keyPress) {
+				case "right": {
+					currentX = (currentX + 1 + N_COLUMNS) % N_COLUMNS;
+					break;
+				}
 
-		switch (keyPress.name) {
-			case "down": {
-				currentY = (currentY + 1 + N_ROWS) % N_ROWS; 
-				break;
-			}
-			case "up" : {
-				currentY = (currentY - 1 + N_ROWS) % N_ROWS; 
-				break;
-			}
+				default: {
 
-			case "left" : {
-				currentX = (currentX - 1 + N_COLUMNS) %N_COLUMNS; 
-				break;
-			}
-
-			case  "right" : {
-				currentX = (currentX + 1 + N_COLUMNS) %N_COLUMNS; 
-				break;
-			}
-
-			default: {
-
+				}
 			}
 		}
-	}
 
-	const newMatrix = setCell(clearedMatrix, currentY, currentX, 'X');
+		const newMatrix = setCell(clearedMatrix, currentY, currentX, 'X');
 
-	if (tickCount > 100) {
-		exit("Thank you for playing!");
+		if (tickCount > 100) {
+			exit("Thank you for playing!");
+		}
+		return {newMatrix, newState: null,};
 	}
-	return newMatrix; 
-}); 
+});
+
 ```
