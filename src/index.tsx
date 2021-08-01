@@ -8,7 +8,7 @@ import keypress from "keypress";
 type Char = string;
 type Matrix = Array<Array<Char>>;
 
-type TickFunction<T> = (
+export type TickFunction<T> = (
 	matrix: Matrix,
 	tickCount: number,
 	exit: (message: string) => void,
@@ -27,7 +27,7 @@ export type KeyPress = {
 	sequence: string;
 }
 
-type Options<T> = {
+export type Options<T> = {
 	nRows: number;
 	nColumns: number;
 	intervalTime: number;

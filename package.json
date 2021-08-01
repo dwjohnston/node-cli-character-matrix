@@ -3,6 +3,7 @@
   "version": "1.0.3",
   "main": "lib/index.js",
   "license": "MIT",
+  "repository": "https://github.com/dwjohnston/node-cli-character-matrix",
   "dependencies": {
     "@use-it/interval": "^1.0.0",
     "ink": "^3.0.8",
