@@ -5,6 +5,7 @@ A simple cli tool for drawing matrix based games.
 
 ### startMatrixApplication(options)
 
+**Options object**
 
 - **nRows** - Number of rows the matrix is to have
 - **nColumns** - Number of columns the matrix is to have. 
