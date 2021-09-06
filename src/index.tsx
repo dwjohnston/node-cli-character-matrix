@@ -4,9 +4,15 @@ import useInterval from "@use-it/interval";
 
 //@ts-ignore
 import keypress from "keypress";
+import { captureRejections } from 'events';
 
-type Char = string;
-type Matrix = Array<Array<Char>>;
+export type Char = string | {
+	char: string; 
+	color?: string; 
+	backgroundColor?: string; 
+}
+
+export type Matrix = Array<Array<Char>>;
 
 export type TickFunction<T> = (
 	matrix: Matrix,
@@ -35,17 +41,50 @@ export type Options<T> = {
 	initialState: T;
 }
 
+
+function validateChar (char: Char)  {
+
+
+	let charString :string; 
+	if (typeof char === 'string'){
+		charString = char; 
+	} else if (char.char) {
+		charString = char.char; 
+	}
+	else {
+		throw new Error("Char was of the wrong format! It must be a string, or a {char: string; color?: string; backgroundColor?: string} ")
+	}
+
+	if (charString.length > 1) {
+		throw new Error ("Char must be one character!");
+	}
+
+
+}
+
+function convertChar(char: Char) {
+
+	if (typeof char === 'string'){
+		return {
+			char: char, 
+			color: "white", 
+			backgroundColor: "black"
+		}
+	}else {
+		return {
+			char: char.char, 
+			color: char.color || "white", 
+			backgroundColor: char.backgroundColor || "black"
+		}
+	}
+
+}
+
 const Cell = ({ char = ' ' }: { char: Char }) => {
 
-	if (typeof char !== 'string') {
-		throw new Error("Wrong character type! Character must be a string!")
-	}
-
-	if (char.length > 1) {
-		throw new Error("Character must be a single letter!")
-	}
-
-	return <Box width={1} height={1}><Text color="red" backgroundColor="white">{char}</Text></Box>
+	validateChar(char);
+	const charToUse = convertChar(char);
+	return <Box width={1} height={1}><Text color = {charToUse.color} backgroundColor={charToUse.backgroundColor}>{charToUse.char}</Text></Box>
 }
 
 
@@ -78,14 +117,7 @@ export function clearMatrix(matrix: Matrix): Matrix {
 }
 
 export function setCell(matrix: Matrix, rowNum: number, cellNum: number, char: Char) {
-	if (typeof char !== 'string') {
-		throw new Error("Char must be a string!");
-	}
-
-	if (char.length > 1) {
-		throw new Error("Char must be string of length 1!");
-	}
-
+	validateChar(char);
 	const newMatrix = JSON.parse(JSON.stringify(matrix));
 	newMatrix[rowNum][cellNum] = char;
 

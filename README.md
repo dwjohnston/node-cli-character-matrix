@@ -1,6 +1,23 @@
 # node-cli-character-matrix
 A simple cli tool for drawing matrix based games. 
 
+
+# Notes: 
+
+- Emoji are not supported at this stage. 
+
+## Data Types
+
+**Char** 
+
+```typescript
+export type Char = string | {
+	char: string; 
+	color?: string; 
+	backgroundColor?: string; 
+}
+```
+
 ## Functions 
 
 ### startMatrixApplication(options)
